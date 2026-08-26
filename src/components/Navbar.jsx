@@ -10,7 +10,7 @@ import { personalInfo } from '../data/projects'
 
 const NAV_LINKS = [
   { name: 'Work', href: '#work' },
-  { name: 'AniPulse', href: '#anipulse' },
+  { name: 'Zeedara', href: '#zeedara' },
   { name: 'Practice', href: '#practice' },
   { name: 'Contact', href: '#contact' },
 ]
