@@ -1,0 +1,68 @@
+/* Broadsheet — design tokens (portable drop-in).
+   Canonical values; mirrored into Tailwind's @theme in src/index.css.
+   Light theme on :root; dark theme under [data-theme="dark"]. */
+
+:root,
+[data-theme="broadsheet"],
+[data-theme="light"] {
+  --color-paper: oklch(97% 0.007 83);
+  --color-paper-2: oklch(94.5% 0.009 82);
+  --color-paper-3: oklch(91.5% 0.011 80);
+  --color-rule: oklch(86% 0.012 78);
+  --color-rule-2: oklch(77% 0.015 74);
+  --color-muted: oklch(52% 0.013 66);
+  --color-neutral: oklch(43% 0.015 62);
+  --color-ink-2: oklch(33% 0.014 58);
+  --color-ink: oklch(20% 0.012 52);
+  --color-accent: oklch(45% 0.15 26);
+  --color-accent-ink: oklch(97% 0.007 83);
+  --color-focus: oklch(52% 0.17 26);
+  --color-scrim: oklch(15% 0.01 55);
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 7rem;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.25rem;
+  --text-display: clamp(2.5rem, 6vw + 0.5rem, 4.75rem);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 500ms;
+
+  --radius-card: 4px;
+  --radius-ctl: 3px;
+}
+
+[data-theme="dark"] {
+  --color-paper: oklch(19% 0.008 54);
+  --color-paper-2: oklch(23% 0.010 54);
+  --color-paper-3: oklch(27% 0.012 56);
+  --color-rule: oklch(32% 0.011 58);
+  --color-rule-2: oklch(43% 0.014 60);
+  --color-muted: oklch(64% 0.012 70);
+  --color-neutral: oklch(72% 0.011 72);
+  --color-ink-2: oklch(81% 0.011 78);
+  --color-ink: oklch(94% 0.008 82);
+  --color-accent: oklch(66% 0.145 32);
+  --color-accent-ink: oklch(17% 0.012 54);
+  --color-focus: oklch(70% 0.16 32);
+  --color-scrim: oklch(15% 0.01 55);
+}

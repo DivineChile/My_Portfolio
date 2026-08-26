@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* Hallmark · genre: editorial · macrostructure: 13 Index-First · theme: Broadsheet · design-system: design.md · designed-as-app */
+
+/* Broadsheet theme → Tailwind utilities. Light values live here; the
+   [data-theme="dark"] block below overrides the same custom properties, so
+   every generated utility (bg-paper, text-ink, border-rule, text-accent…)
+   re-themes automatically. Canonical source: tokens.css. */
+@theme {
+  --color-paper: oklch(97% 0.007 83);
+  --color-paper-2: oklch(94.5% 0.009 82);
+  --color-paper-3: oklch(91.5% 0.011 80);
+  --color-rule: oklch(86% 0.012 78);
+  --color-rule-2: oklch(77% 0.015 74);
+  --color-muted: oklch(52% 0.013 66);
+  --color-neutral: oklch(43% 0.015 62);
+  --color-ink-2: oklch(33% 0.014 58);
+  --color-ink: oklch(20% 0.012 52);
+  --color-accent: oklch(45% 0.15 26);
+  --color-accent-ink: oklch(97% 0.007 83);
+  --color-focus: oklch(52% 0.17 26);
+  --color-scrim: oklch(15% 0.01 55);
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-card: 4px;
+  --radius-ctl: 3px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+[data-theme="dark"] {
+  --color-paper: oklch(19% 0.008 54);
+  --color-paper-2: oklch(23% 0.010 54);
+  --color-paper-3: oklch(27% 0.012 56);
+  --color-rule: oklch(32% 0.011 58);
+  --color-rule-2: oklch(43% 0.014 60);
+  --color-muted: oklch(64% 0.012 70);
+  --color-neutral: oklch(72% 0.011 72);
+  --color-ink-2: oklch(81% 0.011 78);
+  --color-ink: oklch(94% 0.008 82);
+  --color-accent: oklch(66% 0.145 32);
+  --color-accent-ink: oklch(17% 0.012 54);
+  --color-focus: oklch(70% 0.16 32);
+  --color-scrim: oklch(15% 0.01 55);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink-2);
+  font-family: var(--font-body);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 500;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
