@@ -3,49 +3,46 @@ import { HiOutlineArrowUpRight } from 'react-icons/hi2'
 import { FaGithub } from 'react-icons/fa6'
 import { projects } from '../data/projects'
 
-const CATEGORIES = ['All', 'Full Stack', 'Frontend']
+const ARCHIVE_PREVIEW = 6 // archive rows shown before "Show all"
 
 export default function ProjectGrid({ onSelectProject }) {
-  const [activeCategory, setActiveCategory] = useState('All')
+  const [showAllArchive, setShowAllArchive] = useState(false)
 
-  const list =
-    activeCategory === 'All' ? projects : projects.filter((p) => p.category === activeCategory)
-  const lead = list[0]
-  const rest = list.slice(1)
+  // Selected = curated featured work; the lead gets the rich treatment.
+  const selected = projects.filter((p) => p.featured)
+  const lead = selected[0]
+  const secondary = selected.slice(1)
+
+  // Archive = everything else, newest year first. .slice() so we never mutate
+  // the shared imported array; Array.sort is stable, so equal years keep
+  // authoring order.
+  const archive = projects
+    .filter((p) => !p.featured)
+    .slice()
+    .sort((a, b) => Number(b.year) - Number(a.year))
+
+  const visibleArchive = showAllArchive ? archive : archive.slice(0, ARCHIVE_PREVIEW)
+
+  // Derive year order from the already-desc-sorted list. NOT a plain object
+  // keyed by year — JS reorders numeric-string keys ascending and would flip
+  // 2025/2024.
+  const years = [...new Set(visibleArchive.map((p) => p.year))]
 
   return (
     <section id="work" className="scroll-mt-24 border-t border-rule">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
         {/* Head */}
-        <div className="flex flex-col gap-6 border-b-2 border-ink pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="font-display text-[clamp(1.9rem,3vw+0.5rem,2.9rem)] font-semibold leading-none tracking-[-0.01em] text-ink">
-              Selected Work
-            </h2>
-            <p className="mt-3 max-w-md font-body text-base leading-relaxed text-muted">
-              Five projects shipped between 2024 and 2025 — streaming, corporate web, and internal
-              tooling.
-            </p>
-          </div>
-          <div className="flex items-center gap-5">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setActiveCategory(cat)}
-                className={`font-mono text-[11px] uppercase tracking-[0.14em] underline-offset-[6px] transition-colors ${
-                  activeCategory === cat
-                    ? 'text-accent underline decoration-2'
-                    : 'text-muted hover:text-ink'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        <div className="border-b-2 border-ink pb-5">
+          <h2 className="font-display text-[clamp(1.9rem,3vw+0.5rem,2.9rem)] font-semibold leading-none tracking-[-0.01em] text-ink">
+            Selected Work
+          </h2>
+          <p className="mt-3 max-w-md font-body text-base leading-relaxed text-muted">
+            Selected work across streaming, corporate web, and internal tooling
+            {archive.length > 0 ? ' — with a full archive below' : ''}.
+          </p>
         </div>
 
-        {/* Index */}
+        {/* Selected index */}
         <ol>
           {lead && (
             <li className="group border-b border-rule py-10">
@@ -120,7 +117,7 @@ export default function ProjectGrid({ onSelectProject }) {
             </li>
           )}
 
-          {rest.map((p, i) => (
+          {secondary.map((p, i) => (
             <li key={p.id} className="group border-b border-rule">
               <button
                 type="button"
@@ -152,6 +149,54 @@ export default function ProjectGrid({ onSelectProject }) {
             </li>
           ))}
         </ol>
+
+        {/* Archive — quieter back-matter, grouped by year */}
+        {archive.length > 0 && (
+          <div className="mt-16 border-t border-rule pt-10">
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent">Archive</h3>
+
+            {years.map((year) => (
+              <div key={year} className="mt-8 first:mt-6">
+                <h4 className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
+                  {year}
+                </h4>
+                <ul className="mt-3">
+                  {visibleArchive
+                    .filter((p) => p.year === year)
+                    .map((p) => (
+                      <li key={p.id} className="group border-b border-rule">
+                        <button
+                          type="button"
+                          onClick={() => onSelectProject(p)}
+                          aria-label={`Open case study — ${p.title}`}
+                          className="grid w-full grid-cols-1 items-baseline gap-2 py-4 text-left transition-colors hover:bg-paper-2/50 sm:grid-cols-12 sm:gap-6"
+                        >
+                          <h5 className="font-display text-lg font-medium tracking-tight text-ink group-hover:text-accent sm:col-span-6">
+                            {p.title}
+                          </h5>
+                          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted sm:col-span-5">
+                            {p.tags.slice(0, 3).join(' · ')}
+                          </span>
+                          <HiOutlineArrowUpRight className="hidden h-4 w-4 justify-self-end text-rule-2 transition-colors group-hover:text-accent sm:col-span-1 sm:block" />
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
+
+            {archive.length > ARCHIVE_PREVIEW && (
+              <button
+                type="button"
+                onClick={() => setShowAllArchive((v) => !v)}
+                aria-expanded={showAllArchive}
+                className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-ink underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+              >
+                {showAllArchive ? 'Show fewer' : `Show all (${archive.length})`}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </section>
   )
