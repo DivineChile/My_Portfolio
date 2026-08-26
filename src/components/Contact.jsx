@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { HiOutlineClipboard, HiOutlineCheck } from 'react-icons/hi2'
+import { HiOutlineClipboard, HiOutlineCheck, HiOutlineExclamationTriangle } from 'react-icons/hi2'
 import { FaGithub, FaLinkedin, FaXTwitter } from 'react-icons/fa6'
+import emailjs from '@emailjs/browser'
 import { personalInfo } from '../data/projects'
+import { EMAILJS } from '../lib/emailjs'
 
 const SOCIALS = [
   { name: 'GitHub', href: personalInfo.socials.github, Icon: FaGithub },
@@ -12,6 +14,7 @@ const SOCIALS = [
 export default function Contact() {
   const [copied, setCopied] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [status, setStatus] = useState('idle') // 'idle' | 'sending' | 'sent' | 'error'
 
   const copyEmail = async () => {
     try {
@@ -19,28 +22,40 @@ export default function Contact() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (e) {
-      /* clipboard unavailable — the mailto link below still works */
+      /* clipboard unavailable — the mailto link beside it still works */
     }
   }
 
-  const compose = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault()
-    const subject = form.name ? `Project enquiry — ${form.name}` : 'Project enquiry'
-    const body = [
-      form.message,
-      '',
-      '—',
-      form.name && `From: ${form.name}`,
-      form.email && `Reply to: ${form.email}`,
-    ]
-      .filter(Boolean)
-      .join('\n')
-    window.location.href = `mailto:${personalInfo.email}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`
+    if (status === 'sending') return
+    setStatus('sending')
+    try {
+      await emailjs.send(
+        EMAILJS.serviceId,
+        EMAILJS.templateId,
+        {
+          from_name: form.name,
+          from_email: form.email,
+          message: form.message,
+        },
+        { publicKey: EMAILJS.publicKey }
+      )
+      setStatus('sent')
+      setForm({ name: '', email: '', message: '' })
+    } catch (err) {
+      console.error('EmailJS send failed:', err)
+      setStatus('error')
+    }
   }
 
-  const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  const update = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }))
+    // Clear a prior result once the visitor starts a new message.
+    if (status === 'sent' || status === 'error') setStatus('idle')
+  }
+
+  const sending = status === 'sending'
 
   return (
     <section id="contact" className="scroll-mt-24 border-t border-rule bg-paper-2">
@@ -121,9 +136,13 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Compose form */}
+          {/* Send form */}
           <div className="lg:col-span-6">
-            <form onSubmit={compose} className="border border-rule bg-paper p-6 sm:p-8">
+            <form
+              onSubmit={sendMessage}
+              aria-busy={sending}
+              className="border border-rule bg-paper p-6 sm:p-8"
+            >
               <div className="space-y-5">
                 <div>
                   <label
@@ -137,8 +156,9 @@ export default function Contact() {
                     type="text"
                     value={form.name}
                     onChange={update('name')}
+                    disabled={sending}
                     autoComplete="name"
-                    className="mt-2 w-full rounded-ctl border border-rule bg-paper-2 px-3 py-2.5 font-body text-base text-ink placeholder:text-muted/70"
+                    className="mt-2 w-full rounded-ctl border border-rule bg-paper-2 px-3 py-2.5 font-body text-base text-ink placeholder:text-muted/70 disabled:opacity-60"
                     placeholder="Your name"
                   />
                 </div>
@@ -154,8 +174,10 @@ export default function Contact() {
                     type="email"
                     value={form.email}
                     onChange={update('email')}
+                    disabled={sending}
+                    required
                     autoComplete="email"
-                    className="mt-2 w-full rounded-ctl border border-rule bg-paper-2 px-3 py-2.5 font-body text-base text-ink placeholder:text-muted/70"
+                    className="mt-2 w-full rounded-ctl border border-rule bg-paper-2 px-3 py-2.5 font-body text-base text-ink placeholder:text-muted/70 disabled:opacity-60"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -171,22 +193,57 @@ export default function Contact() {
                     rows={5}
                     value={form.message}
                     onChange={update('message')}
-                    className="mt-2 w-full resize-none rounded-ctl border border-rule bg-paper-2 px-3 py-2.5 font-body text-base text-ink placeholder:text-muted/70"
+                    disabled={sending}
+                    required
+                    className="mt-2 w-full resize-none rounded-ctl border border-rule bg-paper-2 px-3 py-2.5 font-body text-base text-ink placeholder:text-muted/70 disabled:opacity-60"
                     placeholder="What are you building?"
                   />
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <button
-                  type="submit"
-                  className="rounded-ctl bg-accent px-5 py-2.5 font-mono text-xs uppercase tracking-[0.12em] text-accent-ink transition-opacity hover:opacity-90"
+              <div className="mt-6">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    className="rounded-ctl bg-accent px-5 py-2.5 font-mono text-xs uppercase tracking-[0.12em] text-accent-ink transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {sending ? 'Sending…' : 'Send message'}
+                  </button>
+                  {status === 'idle' && (
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                      Goes straight to my inbox
+                    </span>
+                  )}
+                </div>
+
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="mt-3 min-h-[1.25rem] font-mono text-[11px] leading-relaxed"
                 >
-                  Compose message
-                </button>
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                  Opens your email app
-                </span>
+                  {status === 'sent' && (
+                    <span className="inline-flex items-center gap-1.5 text-ink-2">
+                      <HiOutlineCheck className="h-4 w-4 shrink-0 text-accent" />
+                      Message sent — thanks. I&rsquo;ll get back to you shortly.
+                    </span>
+                  )}
+                  {status === 'error' && (
+                    <span className="inline-flex items-start gap-1.5 text-accent">
+                      <HiOutlineExclamationTriangle className="mt-px h-4 w-4 shrink-0" />
+                      <span>
+                        Couldn&rsquo;t send just now. Please email me directly at{' '}
+                        <a
+                          href={`mailto:${personalInfo.email}`}
+                          className="underline decoration-2 underline-offset-2"
+                        >
+                          {personalInfo.email}
+                        </a>
+                        .
+                      </span>
+                    </span>
+                  )}
+                </p>
               </div>
             </form>
           </div>
